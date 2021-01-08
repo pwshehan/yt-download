@@ -1,49 +1,65 @@
 const youtubedl = require("youtube-dl");
 const fs = require("fs");
-const output = "myvideo.mp4";
 
-let downloaded = 0;
+// function downloadVideo(url, save) {
 
-if (fs.existsSync(output)) {
-  downloaded = fs.statSync(output).size;
-}
+// }
 
-const video = youtubedl(
-  "https://www.youtube.com/watch?v=EngW7tLk6R8",
+// downloadVideo("https://www.youtube.com/watch?v=EngW7tLk6R8", "123.mp4");
 
-  // Optional arguments passed to youtube-dl.
-  ["--format=22"],
+const ytVideos = [
+  { i: 1, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 2, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 3, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 4, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 5, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 6, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 7, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 8, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 9, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  // { i: 10, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+];
 
-  // start will be sent as a range header
-  { start: downloaded, cwd: __dirname }
-);
+const download = (ytVideo) =>
+  new Promise((res) => {
+    let output = ytVideo.i ? ytVideo.i.toString() + ".mp4" : "myvideo.mp4";
 
-// Will be called when the download starts.
-video.on("info", function (info) {
-  console.log("Download started");
-  console.log("filename: " + info._filename);
+    const video = youtubedl(
+      ytVideo.url,
 
-  // info.size will be the amount to download, add
-  let total = info.size + downloaded;
-  console.log("size: " + total);
+      // Optional arguments passed to youtube-dl.
+      ["--format=22"],
 
-  if (downloaded > 0) {
-    // size will be the amount already downloaded
-    console.log("resuming from: " + downloaded);
+      // start will be sent as a range header
+      { start: 0, cwd: __dirname }
+    );
 
-    // display the remaining bytes to download
-    console.log("remaining bytes: " + info.size);
-  }
-});
+    // Will be called when the download starts.
+    video.on("info", function (info) {
+      console.log("Download started");
+      console.log("filename: " + info._filename);
 
-video.pipe(fs.createWriteStream(output, { flags: "a" }));
+      // info.size will be the amount to download, add
+      let total = info.size;
+      console.log("size: " + total);
+    });
 
-// Will be called if download was already completed and there is nothing more to download.
-video.on("complete", function complete(info) {
-  "use strict";
-  console.log("filename: " + info._filename + " already downloaded.");
-});
+    video.pipe(fs.createWriteStream(output, { flags: "a" }));
 
-video.on("end", function () {
-  console.log("finished downloading!");
-});
+    // Will be called if download was already completed and there is nothing more to download.
+    video.on("complete", function complete(info) {
+      "use strict";
+      console.log("filename: " + info._filename + " already downloaded.");
+    });
+
+    video.on("end", function () {
+      res(ytVideo.i);
+    });
+  });
+
+const dlPromise = (video) =>
+  download(video).then((result) => {
+    console.log("finished downloading: ", result);
+  });
+
+ytVideos.reduce((p, x) => p.then((_) => dlPromise(x)), Promise.resolve());
