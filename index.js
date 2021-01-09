@@ -1,7 +1,10 @@
 const youtubedl = require("youtube-dl");
 const fs = require("fs");
 const prettyBytes = require("pretty-bytes");
-var figlet = require("figlet");
+const figlet = require("figlet");
+const lineReader = require("line-reader");
+
+const videoList = "videoList.txt";
 
 const ytVideos = [
   { i: 1, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" }, // Don't delete this line
@@ -15,6 +18,26 @@ figlet("yt-Download!!", function (err, data) {
   console.log("---- By Mickfrost");
   console.log("=================");
 });
+
+const readTXTFile = new Promise((res) => {
+  index = 2;
+  lineReader.eachLine(videoList, function (line, last) {
+    let str = line.replace(/\s+/g, "");
+    if (str && str.substr(0, 2) != "//") {
+      ytVideos.push({ i: index, url: str });
+      index++;
+    }
+    if (last) {
+      res();
+    }
+  });
+});
+
+if (fs.existsSync(videoList)) {
+  readTXTFile.then(() => {
+    ytVideos.reduce((p, x) => p.then((_) => dlPromise(x)), Promise.resolve());
+  });
+}
 
 const download = (ytVideo) =>
   new Promise((res) => {
@@ -67,7 +90,6 @@ const dlPromise = (video) =>
       }
     } catch (err) {
       console.error(err);
+      return;
     }
   });
-
-ytVideos.reduce((p, x) => p.then((_) => dlPromise(x)), Promise.resolve());
