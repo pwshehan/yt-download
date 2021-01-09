@@ -110,4 +110,4 @@ dist
 .vscode-test
 
 #videos
-.mp4
+*.mp4

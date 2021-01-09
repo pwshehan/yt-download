@@ -1,15 +1,11 @@
 const youtubedl = require("youtube-dl");
 const fs = require("fs");
-
-// function downloadVideo(url, save) {
-
-// }
-
-// downloadVideo("https://www.youtube.com/watch?v=EngW7tLk6R8", "123.mp4");
+const prettyBytes = require("pretty-bytes");
+var figlet = require("figlet");
 
 const ytVideos = [
   { i: 1, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 2, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  { i: 2, url: "https://www.youtube.com/watch?v=HjxYvcdpVnU" },
   // { i: 3, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
   // { i: 4, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
   // { i: 5, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
@@ -20,9 +16,19 @@ const ytVideos = [
   // { i: 10, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
 ];
 
+figlet("yt-Download!!", function (err, data) {
+  if (err) {
+    console.log("yt-Download!");
+  }
+  console.log(data);
+  console.log("---- By Mickfrost");
+  console.log("=================");
+});
+
 const download = (ytVideo) =>
   new Promise((res) => {
     let output = ytVideo.i ? ytVideo.i.toString() + ".mp4" : "myvideo.mp4";
+    let output_modified = null;
 
     const video = youtubedl(
       ytVideo.url,
@@ -38,10 +44,8 @@ const download = (ytVideo) =>
     video.on("info", function (info) {
       console.log("Download started");
       console.log("filename: " + info._filename);
-
-      // info.size will be the amount to download, add
-      let total = info.size;
-      console.log("size: " + total);
+      output_modified = info._filename;
+      console.log("size: " + prettyBytes(info.size));
     });
 
     video.pipe(fs.createWriteStream(output, { flags: "a" }));
@@ -53,13 +57,26 @@ const download = (ytVideo) =>
     });
 
     video.on("end", function () {
-      res(ytVideo.i);
+      res({ i: ytVideo.i, output, output_modified });
     });
   });
 
 const dlPromise = (video) =>
-  download(video).then((result) => {
-    console.log("finished downloading: ", result);
+  download(video).then(({ i, output, output_modified }) => {
+    console.log("finished downloading: ", i);
+    try {
+      if (!fs.existsSync(output_modified)) {
+        fs.rename(output, output_modified, () => {
+          console.log(i, "Renamed with Youtube Title");
+          console.log("--------------------------------------------------");
+        });
+      } else {
+        console.log(i, "Unable to rename");
+        console.log("--------------------------------------------------");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   });
 
 ytVideos.reduce((p, x) => p.then((_) => dlPromise(x)), Promise.resolve());
