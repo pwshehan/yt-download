@@ -4,16 +4,7 @@ const prettyBytes = require("pretty-bytes");
 var figlet = require("figlet");
 
 const ytVideos = [
-  { i: 1, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  { i: 2, url: "https://www.youtube.com/watch?v=HjxYvcdpVnU" },
-  // { i: 3, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 4, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 5, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 6, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 7, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 8, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 9, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
-  // { i: 10, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" },
+  { i: 1, url: "https://www.youtube.com/watch?v=EngW7tLk6R8" }, // Don't delete this line
 ];
 
 figlet("yt-Download!!", function (err, data) {
